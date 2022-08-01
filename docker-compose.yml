@@ -14,7 +14,7 @@ services:
   php:
     build:
       args:
-        user: lar
+        user: www-data
         uid: 1000
       context: ./php/
     image: ${PHP_IMAGE}
