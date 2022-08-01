@@ -1,0 +1,51 @@
+version: "3.7"
+services:
+  nginx:
+    image: nginx
+    container_name: ${BASENAME}-nginx
+    ports:
+      - "81:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - php
+    networks:
+      - net
+  php:
+    build:
+      args:
+        user: lar
+        uid: 1000
+      context: ./php/
+    image: ${PHP_IMAGE}
+    container_name: ${PHP_CONTAINER}
+    restart: unless-stopped
+    working_dir: /var/www/html
+    env_file:
+      - .env
+    ports:
+      - ":9000"
+    volumes:
+      - ./php/src:/var/www/html
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - db
+    networks:
+      - net
+
+  db:
+    container_name: ${DB_CONTAINER}
+    image: ${DB_IMAGE}
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    ports:
+      - ${DB_PORT_OUT}:3306
+    networks:
+      - net
+networks:
+  net:
+    driver: bridge
